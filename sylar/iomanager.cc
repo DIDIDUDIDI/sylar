@@ -42,7 +42,7 @@ namespace sylar {
     }
     
 
-    IOManager::IOManager(size_t threads, bool use_caller, const std::string name) 
+    IOManager::IOManager(size_t threads, bool use_caller, const std::string& name) 
         : Scheduler(threads, use_caller, name) {
         /*
         epoll_event 和 m_epfd 之间的关系涉及到 epoll 的工作机制。让我解释一下：
@@ -81,7 +81,7 @@ namespace sylar {
         SYLAR_ASSERT(!rt);
 
         //m_fdContexts.resize(64);        //初始化到64
-        contextResize(64);
+        contextResize(32);
 
         start();                        // scheduler 的start方法
     }
@@ -289,7 +289,13 @@ namespace sylar {
     }
 
     bool IOManager::stopping() {
-        return Scheduler::stopping() && m_pendingEventCount == 0;
+        uint64_t timeout = 0;
+        return stopping(timeout);
+    }
+
+    bool IOManager::stopping(uint64_t& timeout) {
+        timeout = IOManager::getNextTimer();
+        return timeout == ~0ull && m_pendingEventCount == 0 && Scheduler::stopping();
     }
 
     void IOManager::idle() {
@@ -297,17 +303,25 @@ namespace sylar {
         std::shared_ptr<epoll_event> shared_events(events, [](epoll_event* ptr) {
             delete[] ptr;
         });
-
+        
         while(true) {
-            if(stopping()) {
+            uint64_t next_timeout = 0;
+            if(stopping(next_timeout)) {
                 SYLAR_LOG_INFO(g_logger) << "name = " << getName() << " idle stopping exit";
                 break; 
             }
 
             int rt = 0;
             do {
-                static const int MAX_TIMEOUT = 5000;                   // 超时时间
-                rt = epoll_wait(m_epfd, events, 64, MAX_TIMEOUT);      // 返回的监听事件，有触发会返回，如果超过timeout，也会唤醒
+                static const int MAX_TIMEOUT = 3000;                   // 超时时间
+                if(next_timeout != ~0ull) {
+                    next_timeout = std::min((int)next_timeout, MAX_TIMEOUT);
+                    // next_timeout = (int)next_timeout > MAX_TIMEOUT ? MAX_TIMEOUT : next_timeout;
+                } else {
+                    next_timeout = MAX_TIMEOUT;
+                }
+
+                rt = epoll_wait(m_epfd, events, 64, (int)next_timeout);      // 返回的监听事件，有触发会返回，如果超过timeout，也会唤醒
 
                 if(rt < 0 && errno == EINTR) {
                     // 重新循环
@@ -315,8 +329,17 @@ namespace sylar {
                     break;
                 }
             } while (true);
-            
-            for(int i = 0; i < rt; ++ i) {                              // 遍历返回的监听事件
+        
+            // 如果定时器有任务，那么先scheduler下
+            std::vector<std::function<void()> > cbs;
+            TimerManager::listExpiredCb(cbs);
+            if(!cbs.empty()) {
+                // SYLAR_LOG_DEBUG(g_logger) << "cbs size = " << cbs.size();
+                Scheduler::schedule(cbs.begin(), cbs.end());
+                cbs.clear();
+            }
+
+            for(int i = 0; i < rt; ++i) {                              // 遍历返回的监听事件
                 epoll_event& event = events[i];
                 if(event.data.fd == m_tickleFds[0]) {                   // 如果事件是否是用来唤醒的epollwait的事件，m_tickleFds[0]是我们的输入端
                     uint8_t dummy;                                      // 如果是去处理下数据   
@@ -370,5 +393,12 @@ namespace sylar {
 
             raw_ptr -> swapOut();
         }
+    }
+
+    /*
+        如果有任务加在定时器的最前端要立刻执行，需要重置epoll wait的时间
+    */
+    void IOManager::onTimerInsertedAtFront() {
+        tickle();
     }
 }

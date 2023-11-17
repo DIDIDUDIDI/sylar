@@ -51,7 +51,29 @@ void test1() {
     iom.schedule(&test_fiber);
 }
 
+static sylar::Timer::ptr s_timer;
+sylar::Mutex s_mutex;
+void test_timer() {
+    sylar::IOManager iom(2);
+    s_timer = iom.addTimer(1000, [](){
+        
+        SYLAR_LOG_INFO(g_logger) << "hello timer";
+        static int i = 0;
+        if(i == 5) {
+            s_timer -> cancel();
+        }
+        if(i == 2) {
+            s_timer -> reset(2000, false);
+        }
+        {
+            sylar::Mutex::Lock test_lock(s_mutex);
+            ++i;
+        }
+    }, true);
+}
+
 int main(int argc, char** argv) {
-    test1();
+    //test1();
+    test_timer();
     return 0;
 }

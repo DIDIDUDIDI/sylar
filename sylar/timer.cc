@@ -119,7 +119,7 @@ namespace sylar {
         }
     }
 
-    Timer::ptr TimerManager::addConditionTimer(uint64_t ms, std::function<void()> cb, std::weak_ptr<void> weak_cond, bool recurring = false) {
+    Timer::ptr TimerManager::addConditionTimer(uint64_t ms, std::function<void()> cb, std::weak_ptr<void> weak_cond, bool recurring) {
         return addTimer(ms, std::bind(&OnTimer, weak_cond, cb), recurring);
     }
 
@@ -143,7 +143,7 @@ namespace sylar {
         }
     }
 
-    // 引用穿第一个cbs vc, 到时候外部的cbs也会修改，C++技巧
+    // 引用一个cbs vc, 到时候外部的cbs也会修改，C++技巧
     void TimerManager::listExpiredCb(std::vector<std::function<void()> >& cbs) {
         uint64_t now_ms = sylar::GetCurrentMS();
         std::vector<Timer::ptr> expired;
@@ -172,7 +172,17 @@ namespace sylar {
             cbs.push_back(timer -> m_cb);
 
             if(timer -> m_recurring) {          // 如果是循环定时器，那么重置
-                timer->m_next = now_ms + timer -> m_next;
+                /*
+                    11/18 惨案，gdb debug到深夜因为这里的timer的下次设置时间错了,
+                    gdb attch到当前的线程之后，bt一直显示在等epoll_wait,
+                    说明没有唤醒。
+                    之前的code是： timer->m_next = now_ms + timer -> m_next; 
+                    m_next 在设置的时候是： 
+                    m_next = sylar::GetCurrentMS() + m_ms;
+                    所以等于下一次执行要等52年多...
+                    所以hello了一次之后就一直卡在hello timer了
+                */
+                timer->m_next = now_ms + timer -> m_ms;  
                 m_timers.insert(timer);
             } else {                            // 否则清空，防止智能指针不释放
                 timer -> m_cb = nullptr;
@@ -203,4 +213,8 @@ namespace sylar {
         return rollover;
     }
 
+    bool TimerManager::hasTimer() {
+        RWMutexType::ReadLock lock(m_mutex);
+        return !m_timers.empty();
+    }
 }

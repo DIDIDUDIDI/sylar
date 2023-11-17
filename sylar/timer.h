@@ -12,14 +12,15 @@ namespace sylar {
         friend class TimerManager;
         public:
             typedef std::shared_ptr<Timer> ptr;
+            bool cancel();
+            bool refresh();
+            bool reset(uint64_t ms, bool from_now);
+
         private:
             // 不能自己定义Timer，只能他通过TimerManager调用
             Timer(uint64_t ms, std::function<void()> cb, bool recurring, TimerManager* manager);
             Timer(uint64_t next);
-
-            bool cancel();
-            bool refresh();
-            bool reset(uint64_t ms, bool from_now);
+            
         private:
             bool m_recurring = false;       // 是否周期循环定时器
             uint64_t m_ms = 0;              // 执行周期
@@ -48,7 +49,7 @@ namespace sylar {
 
             uint64_t getNextTimer();
             void listExpiredCb(std::vector<std::function<void()> >& cbs);       //返回所有到期、要执行的回调，给scheduler 用的
-
+            bool hasTimer();
         protected:
             virtual void onTimerInsertedAtFront() = 0;              // 快速唤醒，如果当前的定时比idle默认轮训小，需要紧急唤醒
             void addTimer(Timer::ptr val, RWMutexType::WriteLock& lock);

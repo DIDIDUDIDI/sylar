@@ -2,9 +2,10 @@
 #define __SYLAR_IOMANAGER_H__
 
 #include "scheduler.h"
+#include "timer.h"
 
 namespace sylar{
-    class IOManager : public Scheduler {
+    class IOManager : public Scheduler, public TimerManager {
     public:
         typedef std::shared_ptr<IOManager> ptr;
         typedef RWMutex RWmutexType;
@@ -38,24 +39,24 @@ namespace sylar{
         };
 
     public:
-        IOManager(size_t threads = 1, bool use_caller = true, const std::string name = ""); 
+        IOManager(size_t threads = 1, bool use_caller = true, const std::string& name = ""); 
         ~IOManager();
 
         //0 success, -1 fail
         int addEvent(int fd, Event event, std::function<void()> cb = nullptr);
         bool delEvent(int fd, Event event);
         bool cancelEvent(int fd, Event event);
-
         bool cancelAll(int fd);
-
         static IOManager* GetThis();
     
     protected:
         void tickle() override;
         bool stopping() override;
         void idle() override;
-
+        void onTimerInsertedAtFront() override; 
         void contextResize(size_t size);
+        bool stopping(uint64_t& timeout);
+
     private:
         int m_epfd = 0;                // e_poll        epoll事件实例
         int m_tickleFds[2];            // pipeline      [0]:输入端 [1]输出端

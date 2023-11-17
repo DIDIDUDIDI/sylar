@@ -1,6 +1,6 @@
 # sylar
 
-use for learning sylar project, orginal repo: https://github.com/sylar-yin/sylar  
+学习用复写sylar, 原始仓库: https://github.com/sylar-yin/sylar  
 
 How to start:
 ```
