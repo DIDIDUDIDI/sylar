@@ -1,0 +1,46 @@
+logs:
+    - name: root
+      level: info
+      formatter: '%d%T%m%n'
+      appender:
+          - type: FileLogAppender
+            file: log.txt
+          - type: StdoutLogAppender
+    - name: system
+      level: debug
+      formatter: '%d%T%m%n'
+      appender:
+          - type: FileLogAppender
+            path: log.txt
+          - type: StdoutLogAppender
+
+system:
+    port: 9900
+    value: 15
+    int_vec: 
+      - 10
+      - 30
+    int_lis: [99, 98]
+    int_set: [500, 600, 500]
+    int_hashset: [5000, 60000, 5000]
+    str_int_map: 
+     didi: 27 
+     coca: 31
+    str_int_umap: 
+     cn: 5000
+     us: 200
+
+class:
+    person:
+        name: DIDI
+        age: 28
+        sex: 1
+    map:
+       puzzle:
+         name: PaiShuoChen
+         age: 29
+         sex: 1
+       coca:
+         name: CaoCong
+         age: 31
+         sex: 1

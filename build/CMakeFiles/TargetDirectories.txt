@@ -1,0 +1,10 @@
+/root/workspcae/sylar/build/CMakeFiles/edit_cache.dir
+/root/workspcae/sylar/build/CMakeFiles/test_iomanager.dir
+/root/workspcae/sylar/build/CMakeFiles/rebuild_cache.dir
+/root/workspcae/sylar/build/CMakeFiles/test_scheduler.dir
+/root/workspcae/sylar/build/CMakeFiles/test_fiber.dir
+/root/workspcae/sylar/build/CMakeFiles/test_config.dir
+/root/workspcae/sylar/build/CMakeFiles/test_utils.dir
+/root/workspcae/sylar/build/CMakeFiles/sylar.dir
+/root/workspcae/sylar/build/CMakeFiles/test.dir
+/root/workspcae/sylar/build/CMakeFiles/test_thread.dir

@@ -1,0 +1,36 @@
+2023-10-29 19:03:33	 name = system.str_int_umap desecrption = system value Typename = St13unordered_mapISsiSt4hashISsESt8equal_toISsESaISt4pairIKSsiEEE value = US: 1
+CN: 86
+2023-10-29 19:03:33	 name = system.int_set desecrption = system value Typename = St3setIiSt4lessIiESaIiEE value = - 100
+- 200
+2023-10-29 19:03:33	 name = system.int_lis desecrption = system value Typename = St4listIiSaIiEE value = - 5
+- 10
+- 30
+2023-10-29 19:03:33	 name = system.int_vec desecrption = system value Typename = St6vectorIiSaIiEE value = - 1
+- 2
+- 3
+- 4
+- 5
+2023-10-29 19:03:33	 name = class.map desecrption = person class test Typename = St3mapISs6PersonSt4lessISsESaISt4pairIKSsS0_EEE value = 
+2023-10-29 19:03:33	 name = system.str_int_map desecrption = system value Typename = St3mapISsiSt4lessISsESaISt4pairIKSsiEEE value = coca: 93
+didi: 96
+2023-10-29 19:03:33	 name = system.int_hashset desecrption = system value Typename = St13unordered_setIiSt4hashIiESt8equal_toIiESaIiEE value = - 2000
+- 1000
+2023-10-29 19:03:33	 name = system.value desecrption = system value Typename = f value = 10.1999998
+2023-10-29 19:03:33	 name = class.person desecrption = person class test Typename = 6Person value = name: ""
+sex: 0
+age: 0
+2023-10-29 19:03:33	 name = system.port desecrption = system port number Typename = i value = 8080
+2023-10-29 19:03:33	 name = logs desecrption = log config Typename = St3setIN5sylar9LogDefineESt4lessIS1_ESaIS1_EE value = - name: root
+  level: INFO
+  formatter: "%d%T%m%n"
+  appender:
+    - type: FileLogAppender
+      file: root.txt
+    - type: StdoutLogAppender
+- name: system
+  level: DEBUG
+  formatter: "%d%T[%p]%T%m%n"
+  appender:
+    - type: FileLogAppender
+      file: system.txt
+    - type: StdoutLogAppender
