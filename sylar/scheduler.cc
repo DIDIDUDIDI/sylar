@@ -1,6 +1,8 @@
 #include "scheduler.h"
 #include "log.h"
 #include "macro.h"
+#include "hook.h"
+
 
 namespace sylar {
 
@@ -166,6 +168,7 @@ namespace sylar {
     // 新创建的线程直接在run 里面启动
     void Scheduler::run() {
         SYLAR_LOG_INFO(g_logger) << "stepin to run()";
+        set_hook_enable(true);
         setThis();
         if(sylar::GetThreadID() != m_rootThread) {  // 判断运行call方法的是不是当前的主线程，如果不是就要初始化fiber，主线程的初始化fiber在构造函数中完成了
             t_fiber = Fiber::GetThis().get();
