@@ -81,18 +81,19 @@ extern "C" {
     typedef ssize_t (*writev_fun)(int fd, const struct iovec *iov, int iovcnt);
     extern writev_fun writev_f;
 
-    typedef int (*send_fun)(int s, const void *msg, size_t len, int flags);
+    typedef ssize_t (*send_fun)(int s, const void *msg, size_t len, int flags);
     extern send_fun send_f;
 
-    typedef int (*sendto_fun)(int s, const void *msg, size_t len, int flags, const struct sockaddr *to, socklen_t tolen);
+    typedef ssize_t (*sendto_fun)(int s, const void *msg, size_t len, int flags, const struct sockaddr *to, socklen_t tolen);
     extern sendto_fun sendto_f;
 
-    typedef int (*sendmsg_fun)(int s, const struct msghdr *msg, int flags);
+    typedef ssize_t (*sendmsg_fun)(int s, const struct msghdr *msg, int flags);
     extern sendmsg_fun sendmsg_f;
 
     //close
     typedef int (*close_fun)(int fd);
     extern close_fun close_f;
+
 
     // sock operation 
     typedef int (*fcntl_fun)(int fd, int cmd, ... /* arg */);

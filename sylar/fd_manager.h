@@ -4,6 +4,7 @@
 #include <memory.h>
 #include "thread.h"
 #include "iomanager.h"
+#include "singleton.h"
 
 namespace sylar {
 
@@ -54,6 +55,8 @@ namespace sylar {
             RWMutexType m_mutex;
             std::vector<FdCtx::ptr> m_datas;
     };
+
+    typedef Singleton<FdManager> FdMgr;
 }
 
 #endif

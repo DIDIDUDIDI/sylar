@@ -5,19 +5,6 @@
 #include "hook.h"
 
 namespace sylar {
-    /*
-            bool m_isInit: 1;
-            bool m_isSocket: 1;
-            bool m_sysNonblock: 1;
-            bool m_userNonblock: 1;
-            bool m_isClosed: 1;
-            int m_fd;
-
-            uint64_t m_recvTimeout;     // type 0
-            uint64_t m_sendTimeout;     // type 1
-
-            IOManager* m_iomanager;
-    */
     FdCtx::FdCtx(int fd) 
         :m_isInit(false),
          m_isSocket(false),
@@ -40,14 +27,14 @@ namespace sylar {
         m_recvTimeout = -1;
         m_sendTimeout = -1;
         
-        // 判断句柄是否是socket的请求
-        struct stat fd_stat;
-        if(-1 == fstat(m_fd, &fd_stat)) {
+        // 判断句柄是否是socket的请求   
+        struct stat fd_stat;                // 
+        if(-1 == fstat(m_fd, &fd_stat)) {   // 检查fd是否关闭
             m_isInit = false;
             m_isSocket = false;
-        } else {
+        } else {                            // 未关闭，那么走我们hook
             m_isInit = true;
-            m_isSocket = S_ISSOCK(fd_stat.st_mode);
+            m_isSocket = S_ISSOCK(fd_stat.st_mode); // 是否是socket
         }
 
         // 如果是
@@ -67,19 +54,54 @@ namespace sylar {
         return m_isInit;
     }
 
-    bool FdCtx::close() {
+    // bool FdCtx::close() {
+
+    // }
+
+    void FdCtx::setTimeout(int type, uint64_t v) {      //设置句柄的超时函数
+        if(type == SO_RCVTIMEO) {
+            m_recvTimeout = v;
+        } else {
+            m_sendTimeout = v;
+        }
 
     }
-
-    void FdCtx::setTimeout(int type, uint64_t v) {
-
-    }
-    uint64_t getTimeout(int type);
+    uint64_t FdCtx::getTimeout(int type) {
+        if(type == SO_RCVTIMEO) {
+            return m_recvTimeout;
+        } else {
+            return m_sendTimeout;
+        }
+  }
 
     FdManager::FdManager() {
         m_datas.resize(64);
     }
 
-    FdCtx::ptr get(int fd, bool auto_create = false);       // 如果当前的句柄存在我们就返回，要不然就创建一个
-    void del(int fd);
+    FdCtx::ptr FdManager::get(int fd, bool auto_create) {       // 如果当前的句柄存在我们就返回，要不然就创建一个
+        RWMutexType::ReadLock lock(m_mutex);
+        if((int)m_datas.size() <= fd) {
+            if(! auto_create) {
+                return nullptr;
+            }
+        } else {
+            if(m_datas[fd] || !auto_create) {
+                return m_datas[fd];
+            }
+        }
+        lock.unlock();
+
+        RWMutexType::WriteLock lock2(m_mutex);
+        FdCtx::ptr ctx(new FdCtx(fd));
+        m_datas[fd] = ctx;
+        return ctx;
+    }
+
+    void FdManager::del(int fd) {
+        RWMutexType::WriteLock lock(m_mutex);
+        if((int)m_datas.size() <= fd) {
+            return;
+        }
+        m_datas[fd].reset();
+    }
 }

@@ -114,7 +114,7 @@ namespace sylar {
         if((int)(m_fdContexts.size()) > fd) {      // 如果可以放在队列中
             fd_ctx = m_fdContexts[fd];     
             lock.unlock();
-        } else {
+        } else {                                   // 扩容
             lock.unlock();
             RWmutexType::WriteLock lock2(m_mutex);
             contextResize(fd * 1.5);
@@ -134,7 +134,7 @@ namespace sylar {
         epevent.events = EPOLLET | fd_ctx -> m_event | event;
         epevent.data.ptr = fd_ctx;
 
-        int rt = epoll_ctl(m_epfd, op, fd, &epevent);  // 注册事件
+        int rt = epoll_ctl(m_epfd, op, fd, &epevent);  // 注册事件， 注册后epoll_wait才能监听到
         if(rt) {
             SYLAR_LOG_ERROR(g_logger) << "epoll_ctl(" << m_epfd << ", "
                                       << op << ", " << fd << ", " << epevent.events << "): "
@@ -195,7 +195,7 @@ namespace sylar {
     /*
         del和cal是有区别的
         del是直接删除掉
-        cal是在找到事件后直接强制执行，而不是等到触发条件后在执行（不触发了）
+        cal是在找到事件后直接强制执行，而不是等到触发条件后在执行, 即不触发了
     */
     bool IOManager::cancelEvent(int fd, Event event) {
         // 找到fd ctx
@@ -228,7 +228,7 @@ namespace sylar {
         }
 
         // FdContext::EventContent& event_ctx = fd_ctx->getcontext(event);
-        fd_ctx -> triggerEvent(event);
+        fd_ctx -> triggerEvent(event);                          // 这里执行的是把传进来的事件取消掉的事件了
         --m_pendingEventCount;
         return true;
     }

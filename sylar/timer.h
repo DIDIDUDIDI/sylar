@@ -6,6 +6,21 @@
 #include <set>
 #include "util.h"
 
+
+/*
+    Timer逻辑：
+    
+    Timer类是一个单独的类，保存一个timer的基础属性包括回调方法，可以控制本身的属性
+
+    TimerManager类是管理timer的一个类，采用小顶端实现，可以将每个timer按照下次的准确执行时间来排序
+
+    Timer不能单独创造，是和IOManager一起的功能类，运行逻辑为：
+    IOmanager继承TimerManager，然后添加Timer
+    之后在IOmanager的核心方法Idle()中，会先检查一下再TM中下次的要执行的CB任务的时间，并且和默认的idle时间5秒选一个最小的出来，作为timeout时间
+    在timeout的时候到的时候会去执行Scheduler里的待执行的CB或者Fiber，
+    但是在Timout之前，会先来TM里找下有没有到时间要执行的方法，有就一并加到Scheduler的列表中，下次执行。
+*/    
+
 namespace sylar {
     class TimerManager;
     class Timer : public std::enable_shared_from_this<Timer> {
