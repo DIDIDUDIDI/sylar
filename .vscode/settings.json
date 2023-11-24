@@ -63,6 +63,16 @@
         "hash_set": "cpp",
         "forward_list": "cpp",
         "unordered_set": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "internet": "cpp",
+        "condition_variable": "cpp",
+        "buffer": "cpp",
+        "executor": "cpp",
+        "io_context": "cpp",
+        "netfwd": "cpp",
+        "socket": "cpp",
+        "timer": "cpp",
+        "future": "cpp",
+        "mutex": "cpp"
     }
 }
