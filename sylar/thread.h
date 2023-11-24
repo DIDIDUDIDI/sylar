@@ -8,6 +8,7 @@
 #include <semaphore.h>
 #include <stdint.h>
 #include <atomic>
+#include "noncopyable.h"
 
 /*
     实现线程库
@@ -18,17 +19,17 @@ namespace sylar {
         信号量类，包装semaphore.h
         线程同步
     */
-    class Semaphore {
-    public:
+    class Semaphore : Noncopyable {
+    public: 
         Semaphore(uint32_t count = 0);
         ~Semaphore();
 
         void wait();
         void notify();
-    private:
-        Semaphore(const Semaphore&) = delete;
-        Semaphore(const Semaphore&&) = delete;
-        Semaphore& operator= (const Semaphore&) = delete;
+    // private:
+    //     Semaphore(const Semaphore&) = delete;
+    //     Semaphore(const Semaphore&&) = delete;
+    //     Semaphore& operator= (const Semaphore&) = delete;
     private:
         sem_t m_semaphore;    // typedef sem_t sem_t -> 实际上是一个长整数
     };
@@ -144,7 +145,7 @@ namespace sylar {
     };
     
     // 互斥量
-    class Mutex {
+    class Mutex : Noncopyable{
     public:
         typedef ScopedLockImpl<Mutex> Lock;
         Mutex() {
@@ -167,7 +168,7 @@ namespace sylar {
     };
 
     //测试用空锁
-    class NullMutex {
+    class NullMutex : Noncopyable{
     public:
         typedef ScopedLockImpl<NullMutex> Lock;
         NullMutex() {}
@@ -177,7 +178,7 @@ namespace sylar {
     };
 
     // 读写互斥量
-    class RWMutex {
+    class RWMutex : Noncopyable{
     public:
         typedef ReadScopedLockImpl<RWMutex> ReadLock;
         typedef WriteScopedLockImpl<RWMutex> WriteLock;
@@ -205,7 +206,7 @@ namespace sylar {
         pthread_rwlock_t m_lock;
     };
 
-    class NullRWMutex {
+    class NullRWMutex : Noncopyable {
     public:
         typedef ReadScopedLockImpl<NullMutex> ReadLock;
         typedef WriteScopedLockImpl<NullMutex> WriteLock;
@@ -221,7 +222,7 @@ namespace sylar {
         spinlock
         小时候最熟悉的锁，不说了       
     */
-   class SpinLock {
+   class SpinLock : Noncopyable {
     public:
         typedef ScopedLockImpl<SpinLock> Lock;
         SpinLock() {
@@ -249,7 +250,7 @@ namespace sylar {
         Spinlock就是包装了CAS实现的。
         但是慎用无锁编程！！！
     */
-    class CASLock {
+    class CASLock : Noncopyable {
     public:
         typedef ScopedLockImpl<CASLock> Lock;
         CASLock() {
