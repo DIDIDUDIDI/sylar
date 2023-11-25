@@ -38,13 +38,13 @@ namespace sylar {
         virtual IPAddress::ptr subnetMask(uint32_t prefix_len) = 0;
 
         virtual uint32_t getPort() const = 0;
-        virtual void setPPort(uint32_t v) = 0;
+        virtual void setPort(uint32_t v) = 0;
     };
 
     class IPv4Address : public IPAddress {
     public:
         typedef std::shared_ptr<IPv4Address> ptr;
-        IPv4Address(uint32_t Address = INADDR_ANY, uint32_t port = 0);
+        IPv4Address(uint32_t address = INADDR_ANY, uint32_t port = 0);
 
         const sockaddr* getAddr() const override;
         socklen_t getAddrLen() const override;
@@ -55,7 +55,7 @@ namespace sylar {
         IPAddress::ptr subnetMask(uint32_t prefix_len) override;
 
         uint32_t getPort() const override;
-        void setPPort(uint32_t v) override;
+        void setPort(uint32_t v) override;
     
     private:
         sockaddr_in m_addr;
@@ -64,7 +64,8 @@ namespace sylar {
     class IPv6Address : public IPAddress {
     public:
         typedef std::shared_ptr<IPv6Address> ptr;
-        IPv6Address(uint32_t Address = INADDR_ANY, uint32_t port = 0);
+        IPv6Address();
+        IPv6Address(const char* address, uint32_t port = 0);
 
         const sockaddr* getAddr() const override;
         socklen_t getAddrLen() const override;
@@ -75,7 +76,7 @@ namespace sylar {
         IPAddress::ptr subnetMask(uint32_t prefix_len) override;
 
         uint32_t getPort() const override;
-        void setPPort(uint32_t v) override;
+        void setPort(uint32_t v) override;
     
     private:
         sockaddr_in6 m_addr;
@@ -84,6 +85,7 @@ namespace sylar {
     class UnixAddress : public Address {
     public:
         typedef std::shared_ptr<UnixAddress> ptr;
+        UnixAddress();
         UnixAddress(const std::string& path);
 
         const sockaddr* getAddr() const override;
@@ -98,13 +100,14 @@ namespace sylar {
     class UnknowAddress : public Address {
     public:
         typedef std::shared_ptr<UnknowAddress> ptr;
+        UnknowAddress(int family);
 
         const sockaddr* getAddr() const override;
         socklen_t getAddrLen() const override;
         std::ostream& insert(std::ostream& os) const override;
 
     private:
-        sockaddr m_socket;
+        sockaddr m_addr;
     };
 }
 
