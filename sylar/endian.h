@@ -6,7 +6,7 @@
 
 #include <byteswap.h>
 #include <stdint.h>
-#include <type_traits>
+// #include <type_traits>
 
 namespace sylar {
 
@@ -36,7 +36,7 @@ namespace sylar {
 
     #if SYLAR_BYTER_ORDER == SYLAR_BIG_ENDIAN
     template<class T>
-    T byteswapOnLittileEndian(T t) {
+    T byteswapOnLittleEndian(T t) {
         return t;
     }
 
@@ -46,7 +46,7 @@ namespace sylar {
     }
     #else 
     template<class T>
-    T byteswapOnLittileEndian(T t) {
+    T byteswapOnLittleEndian(T t) {
         return byteswap(t);
     }
 

@@ -6,7 +6,9 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include <iostream>
+#include <stddef.h>
 #include <netinet/in.h>
 
 namespace sylar {
@@ -14,6 +16,20 @@ namespace sylar {
     class Address {
     public:
         typedef std::shared_ptr<Address> ptr;
+
+        static Address::ptr Create(const sockaddr* addr, socklen_t addrlen);
+        static bool Lookup(std::vector<Address::ptr>& result, const std::string& host, 
+                            int family = AF_UNSPEC, int type = 0, int protocol = 0);
+        static Address::ptr LookupAny(const std::string& host, 
+                            int family = AF_UNSPEC, int type = 0, int protocol = 0);
+        static IPAddress::ptr LookupAnyIPAddress(const std::string& host, 
+                            int family = AF_UNSPEC, int type = 0, int protocol = 0);
+
+        static bool GetInterfaceAddresses(std::multimap<std::string, std::pair<Address::ptr, uint32_t> >& result,
+                                          int family = AF_UNSPEC);
+
+        static bool GetInterfaceAddresses(std::vector<std::pair<Address::ptr, uint32_t> >& result,
+                                          const std::string& iface, int family = AF_UNSPEC);
         virtual ~Address() {}
 
         int getFamily() const;
@@ -33,6 +49,8 @@ namespace sylar {
     public:
         typedef std::shared_ptr<IPAddress> ptr;
 
+        static IPAddress::ptr Create(const char* address, uint32_t port = 0);
+
         virtual IPAddress::ptr broadcastAddress(uint32_t prefix_len) = 0;
         virtual IPAddress::ptr networdAddress(uint32_t prefix_len) = 0;
         virtual IPAddress::ptr subnetMask(uint32_t prefix_len) = 0;
@@ -44,6 +62,10 @@ namespace sylar {
     class IPv4Address : public IPAddress {
     public:
         typedef std::shared_ptr<IPv4Address> ptr;
+
+        static IPv4Address::ptr Create(const char* address, uint32_t port = 0);
+
+        IPv4Address(const sockaddr_in& address);
         IPv4Address(uint32_t address = INADDR_ANY, uint32_t port = 0);
 
         const sockaddr* getAddr() const override;
@@ -64,8 +86,10 @@ namespace sylar {
     class IPv6Address : public IPAddress {
     public:
         typedef std::shared_ptr<IPv6Address> ptr;
+        static IPv6Address::ptr Create(const char* address, uint32_t port = 0);
         IPv6Address();
-        IPv6Address(const char* address, uint32_t port = 0);
+        IPv6Address(const sockaddr_in6& address);
+        IPv6Address(const uint8_t address[16], uint32_t port = 0);
 
         const sockaddr* getAddr() const override;
         socklen_t getAddrLen() const override;
@@ -93,7 +117,7 @@ namespace sylar {
         std::ostream& insert(std::ostream& os) const override;
     
     private:
-        struct sockaddr_un m_addr;
+        sockaddr_un m_addr;
         socklen_t m_length;
     };
 
@@ -101,7 +125,7 @@ namespace sylar {
     public:
         typedef std::shared_ptr<UnknowAddress> ptr;
         UnknowAddress(int family);
-
+        UnknowAddress(const sockaddr& addr);
         const sockaddr* getAddr() const override;
         socklen_t getAddrLen() const override;
         std::ostream& insert(std::ostream& os) const override;

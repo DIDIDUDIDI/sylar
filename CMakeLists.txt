@@ -10,9 +10,6 @@ include_directories(/apps/didi/include)
 link_directories(/apps/didi/lib)
 link_directories(/apps/didi/lib64)
 
-
-
-
 #Library 
 set(LIB_SRC
     sylar/log.cc
@@ -26,6 +23,7 @@ set(LIB_SRC
     sylar/timer.cc
     sylar/hook.cc
     sylar/fd_manager.cc
+    sylar/address.cc
     )
 
 add_library(sylar SHARED ${LIB_SRC})
@@ -40,6 +38,8 @@ set(LIB_LIB
     yaml-cpp
     dl
     )
+
+message("***", ${LIB_LIB})
 
 add_executable(test tests/test.cc)
 add_dependencies(test sylar)
