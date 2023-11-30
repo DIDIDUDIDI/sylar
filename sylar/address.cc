@@ -57,11 +57,11 @@ namespace sylar {
         const char* service = NULL;
 
         // 检查IPv6的地址
-        if(!host.empty() && host[0] == "[") {
-            const char* endipv6 = (const char*)memchr(host.c_str() + 1, "]", host.size() - 1);
+        if(!host.empty() && host[0] == '[') {
+            const char* endipv6 = (const char*)memchr(host.c_str() + 1, ']', host.size() - 1);
             if(endipv6) {
                 // TODO check out of range
-                if(*(endipv6 + 1) == ":") {
+                if(*(endipv6 + 1) == ':') {
                     service = endipv6 + 2;
                 }
                 node = host.substr(1, endipv6 - host.c_str() - 1);
@@ -69,11 +69,14 @@ namespace sylar {
         }
 
         // 检查 node services
+        //SYLAR_LOG_DEBUG(g_logger) << "check services?";
         if(node.empty()) {
-            service = (const char*)memchr(host.c_str(), ":", host.size());
+            service = (const char*)memchr(host.c_str(), ':', host.size());
             if(service) {
-                if(!memchr(service + 1, ":", host.c_str() + host.size() - service - 1)) {
+                if(!memchr(service + 1, ':', host.c_str() + host.size() - service - 1)) {
+                    //SYLAR_LOG_DEBUG(g_logger) << "step in";
                     node = host.substr(0, service - host.c_str());
+                    ++service;
                 }
             }
         }
@@ -81,7 +84,7 @@ namespace sylar {
         if(node.empty()) {
             node = host;
         }
-
+        
         int error = getaddrinfo(node.c_str(), service, &hints, &results);
         if(error) {
             SYLAR_LOG_ERROR(g_logger) << "Address::Lookup getaddress(" << host << ","
@@ -97,6 +100,15 @@ namespace sylar {
         }
         freeaddrinfo(results);
         return true;
+    }
+
+    template<class T>
+    static uint32_t CountBytes(T value) {
+        uint32_t result = 0;
+        for(; value; ++result) {
+            value &= value - 1;
+        }
+        return result;
     }
 
     bool Address::GetInterfaceAddresses(std::multimap<std::string, std::pair<Address::ptr, uint32_t> >& result,
@@ -242,7 +254,7 @@ namespace sylar {
 
         try {
             IPAddress::ptr result = std::dynamic_pointer_cast<IPAddress>(
-                                        Address::Create(result ->getAddr(), result -> getAddrLen()));
+                                        Address::Create(results -> ai_addr, (socklen_t)results -> ai_addrlen));
             if(result) {
                 result -> setPort(port);
             }
@@ -255,7 +267,7 @@ namespace sylar {
     }
 
     // 文本型的IPv4 地址转 IPv4的
-    IPv4Address::ptr IPv4Address::Create(const char* address, uint32_t port = 0) {
+    IPv4Address::ptr IPv4Address::Create(const char* address, uint32_t port) {
         IPv4Address::ptr rt(new IPv4Address);
         rt -> m_addr.sin_port = byteswapOnLittleEndian(port);
         int result = inet_pton(AF_INET, address, &rt -> m_addr.sin_addr);
@@ -335,7 +347,7 @@ namespace sylar {
         m_addr.sin_port = byteswapOnLittleEndian(v);
     }
 
-    IPv6Address::ptr IPv6Address::Create(const char* address, uint32_t port = 0) {
+    IPv6Address::ptr IPv6Address::Create(const char* address, uint32_t port) {
         IPv6Address::ptr rt(new IPv6Address);
         rt -> m_addr.sin6_port = byteswapOnLittleEndian(port);
         int result = inet_pton(AF_INET6, address, &rt -> m_addr.sin6_addr);
