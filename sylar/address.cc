@@ -9,7 +9,7 @@
 
 namespace sylar {
 
-    static sylar::Logger::ptr g_logger = SYLAR_LOG_ROOT();
+    static sylar::Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     template<class T>
     static T CreateMask(uint32_t bits) {
@@ -237,7 +237,7 @@ namespace sylar {
         return !(*this == rhs); 
     }
 
-    IPAddress::ptr IPAddress::Create(const char* address, uint32_t port) {
+    IPAddress::ptr IPAddress::Create(const char* address, uint16_t port) {
         addrinfo hints, *results;
         memset(&hints, 0, sizeof(addrinfo));
 
@@ -267,7 +267,7 @@ namespace sylar {
     }
 
     // 文本型的IPv4 地址转 IPv4的
-    IPv4Address::ptr IPv4Address::Create(const char* address, uint32_t port) {
+    IPv4Address::ptr IPv4Address::Create(const char* address, uint16_t port) {
         IPv4Address::ptr rt(new IPv4Address);
         rt -> m_addr.sin_port = byteswapOnLittleEndian(port);
         int result = inet_pton(AF_INET, address, &rt -> m_addr.sin_addr);
@@ -286,11 +286,15 @@ namespace sylar {
 
     
     // 初始化
-    IPv4Address::IPv4Address(uint32_t address, uint32_t port) {
+    IPv4Address::IPv4Address(uint32_t address, uint16_t port) {
         memset(&m_addr, 0, sizeof(m_addr));
         m_addr.sin_family = AF_INET;
         m_addr.sin_port = byteswapOnLittleEndian(port); // 切换网络字节序
         m_addr.sin_addr.s_addr = byteswapOnLittleEndian(address);
+    }
+
+    sockaddr* IPv4Address::getAddr() {
+        return (sockaddr*)&m_addr;
     }
 
     const sockaddr* IPv4Address::getAddr() const {
@@ -343,11 +347,11 @@ namespace sylar {
         return byteswapOnLittleEndian(m_addr.sin_port);
     }
 
-    void IPv4Address::setPort(uint32_t v) {
+    void IPv4Address::setPort(uint16_t v) {
         m_addr.sin_port = byteswapOnLittleEndian(v);
     }
 
-    IPv6Address::ptr IPv6Address::Create(const char* address, uint32_t port) {
+    IPv6Address::ptr IPv6Address::Create(const char* address, uint16_t port) {
         IPv6Address::ptr rt(new IPv6Address);
         rt -> m_addr.sin6_port = byteswapOnLittleEndian(port);
         int result = inet_pton(AF_INET6, address, &rt -> m_addr.sin6_addr);
@@ -370,7 +374,7 @@ namespace sylar {
     }
 
     // IPv6 初始化
-    IPv6Address::IPv6Address(const uint8_t address[16], uint32_t port) {
+    IPv6Address::IPv6Address(const uint8_t address[16], uint16_t port) {
         memset(&m_addr, 0, sizeof(m_addr));
         m_addr.sin6_family = AF_INET6;
         m_addr.sin6_port = byteswapOnLittleEndian(port); // 切换网络字节序
@@ -378,6 +382,10 @@ namespace sylar {
     }
 
     const sockaddr* IPv6Address::getAddr() const {
+        return (sockaddr*)&m_addr;
+    }
+
+    sockaddr* IPv6Address::getAddr() {
         return (sockaddr*)&m_addr;
     }
 
@@ -445,7 +453,7 @@ namespace sylar {
         return byteswapOnLittleEndian(m_addr.sin6_port);
     }
 
-    void IPv6Address::setPort(uint32_t v) {
+    void IPv6Address::setPort(uint16_t v) {
         m_addr.sin6_port = byteswapOnLittleEndian(v);    
     }
 
@@ -478,6 +486,13 @@ namespace sylar {
         return (sockaddr*)&m_addr;
     }
 
+    sockaddr* UnixAddress::getAddr() {
+        return (sockaddr*)&m_addr;
+    }
+    void UnixAddress::setAddrLen(uint32_t v) {
+        m_length = v;
+    }
+
     socklen_t UnixAddress::getAddrLen() const {
         return m_length;
     }
@@ -502,8 +517,13 @@ namespace sylar {
 
 
     const sockaddr* UnknowAddress::getAddr() const {
+        return (sockaddr*)&m_addr;
+    }
+
+    sockaddr* UnknowAddress::getAddr() {
         return &m_addr;
     }
+
     socklen_t UnknowAddress::getAddrLen() const {
         return sizeof(m_addr);
     }

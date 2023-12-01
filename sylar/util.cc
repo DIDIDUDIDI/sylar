@@ -4,7 +4,7 @@
 #include <execinfo.h>
 
 namespace sylar {
-    Logger::ptr g_logger = SYLAR_LOG_NAME("system");
+    static Logger::ptr g_logger = SYLAR_LOG_NAME("system");
 
     pid_t GetThreadID() {
         return syscall(SYS_gettid);
