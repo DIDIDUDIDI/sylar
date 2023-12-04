@@ -8,6 +8,8 @@
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 
+
+
 namespace sylar {
     namespace http {
       /* Request Methods */
@@ -315,6 +317,8 @@ namespace sylar {
             std::string m_reason;
             MapType m_headers;
         };
+
+        
     }
 }
 
