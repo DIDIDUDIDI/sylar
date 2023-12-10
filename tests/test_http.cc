@@ -3,7 +3,7 @@
 
 void test_request() {
     sylar::http::HttpRequest::ptr req(new sylar::http::HttpRequest);
-    req->setHeaders("host", "www.baidu.com");
+    req->setHeader("host", "www.baidu.com");
     req->setBody("hello baidu");
 
     req->dump(std::cout) << std::endl;

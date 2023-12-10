@@ -176,6 +176,7 @@ namespace sylar {
         public:
             typedef std::shared_ptr<HttpRequest> ptr;
             typedef std::map<std::string, std::string, CaseInsensitiveLess> MapType;
+            //typedef std::map<std::string, std::string, CaseInsensitiveLess> MapType;
             HttpRequest(uint8_t version = 0x11, bool close = true);
 
             HttpMethod getMethod() const { return m_method; }
@@ -206,7 +207,7 @@ namespace sylar {
             std::string getParams (const std::string& key, const std::string& def = "") const;
             std::string getCookies(const std::string& key, const std::string& def = "") const;
 
-            void setHeaders(const std::string& key, const std::string& val);
+            void setHeader(const std::string& key, const std::string& val);
             void setParams (const std::string& key, const std::string& val);
             void setCookies(const std::string& key, const std::string& val);
 
@@ -234,25 +235,26 @@ namespace sylar {
 
             template<class T>
             bool checkGetParamsAs(const std::string& key, T& val, const T& def = T()) {
-                return checkGetAs(m_params, key, val, def);
+                return checkGetAs(m_headers, key, val, def);
             }
 
             template<class T>
             T getParamsAs(const std::string& key, const T& def = T()) {
-                return getAs(m_params, key, def);
+                return getAs(m_headers, key, def);
             }
 
             template<class T>
             bool checkGetCookiesAs(const std::string& key, T& val, const T& def = T()) {
-                return checkGetAs(m_cookies, key, val, def);
+                return checkGetAs(m_headers, key, val, def);
             }
 
             template<class T>
             T getCookiesAs(const std::string& key, const T& def = T()) {
-                return getAs(m_cookies, key, def);
+                return getAs(m_headers, key, def);
             }
 
-            std::ostream& dump(std::ostream& os);
+            std::ostream& dump(std::ostream& os) const;
+            std::string toString() const;
 
         private:
             HttpMethod m_method;
@@ -307,7 +309,8 @@ namespace sylar {
                 return getAs(m_headers, key, def);
             }
 
-            std::ostream& dump(std::ostream& os);
+            std::ostream& dump(std::ostream& os) const;
+            std::string toString() const;
         private:
             HttpStatus m_status;
             uint8_t m_version;

@@ -18,9 +18,14 @@ namespace sylar {
 
             HttpRequest::ptr getData() const {return m_data;}
             void setError(int v) { m_error = v; }
+
+            uint64_t getContentLength();
         private:
             http_parser m_parser;
             HttpRequest::ptr m_data;
+            // 1000: invalid method
+            // 1001: invalid version
+            // 1002: invalid field
             int m_error;
         };
 
@@ -33,10 +38,12 @@ namespace sylar {
             int hasError() ;
 
             HttpResponse::ptr getData() const {return m_data;}
+            void setError(int v) { m_error = v; }
+
+            uint64_t getContentLength();
         private:
             httpclient_parser m_parser;
             HttpResponse::ptr m_data;
-            // 1000: invalid method
             // 1001: invalid version
             // 1002: invalid field
             int m_error;

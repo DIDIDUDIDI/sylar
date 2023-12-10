@@ -89,6 +89,7 @@ namespace sylar {
         int getError();
 
         std::ostream& dump(std::ostream& os) const;
+        std::string toString() const;
         int geSocket() const {return m_sock;}
 
         bool cancelRead();
@@ -111,6 +112,8 @@ namespace sylar {
         Address::ptr m_localAddress;
         Address::ptr m_remoteAddress; 
     };
+
+    std::ostream& operator<<(std::ostream& os, const Socket& sock);
 }
 
 #endif

@@ -190,10 +190,14 @@ namespace sylar {
         return getAddr()->sa_family;
     }
 
-    std::string Address::toString() {
+    std::string Address::toString() const {
         std::stringstream ss;
         insert(ss);
         return ss.str();
+    }
+
+    std::ostream& operator<<(std::ostream& os, const Address& addr) {
+        return addr.insert(os); 
     }
 
     Address::ptr Address::Create(const sockaddr* addr, socklen_t addrlen) {

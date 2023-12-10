@@ -390,6 +390,16 @@ namespace sylar {
         return os;
     }
 
+    std::string Socket::toString() const {
+        std::stringstream ss;
+        dump(ss);
+        return ss.str();
+    }
+
+    std::ostream& operator<<(std::ostream& os, const Socket& sock) {
+        return sock.dump(os);
+    }
+
     bool Socket::cancelRead() {
         return IOManager::GetThis() -> cancelEvent(m_sock, sylar::IOManager::READ);
     }

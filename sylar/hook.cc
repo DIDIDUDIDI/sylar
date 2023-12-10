@@ -107,7 +107,7 @@ static ssize_t do_io(int fd, OriginFun fun, const char* hook_fun_name,
         return fun(fd, std::forward<Args>(args)...);    // 直接使用原本的方法，用forward把对应的参数完美转发过去
     }
 
-    SYLAR_LOG_DEBUG(g_logger) << "do_io<" << hook_fun_name << ">";
+    //SYLAR_LOG_DEBUG(g_logger) << "do_io<" << hook_fun_name << ">";
 
     sylar::FdCtx::ptr ctx = sylar::FdMgr::GetInstance() -> get(fd); // 拿到ctx
     if(!ctx) {
@@ -130,7 +130,7 @@ retry:
         n = fun(fd, std::forward<Args>(args)...);
     } 
     if(n == -1 && errno == EAGAIN) {                     // 如果是EAGIN，意为重试，用在，一般出现在非阻塞操作的时候，说明在阻塞，注意我们这里的阻塞指的是我们的线程在等IO，要切换成我们的hook的异步方法把协程的执行时间让出来
-        SYLAR_LOG_DEBUG(g_logger) << "do_io<" << hook_fun_name << ">" << " async";
+        //SYLAR_LOG_DEBUG(g_logger) << "do_io<" << hook_fun_name << ">" << " async";
         sylar::IOManager* iom = sylar::IOManager::GetThis();    
         sylar::Timer::ptr timer;
         std::weak_ptr<timer_info> winfo(tinfo);

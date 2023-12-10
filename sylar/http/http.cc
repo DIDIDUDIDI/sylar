@@ -14,7 +14,7 @@ namespace sylar {
 
         HttpMethod CharsToHttpMethod(const char* m) {
         #define XX(num, name, string) \
-            if(strcmp(#string, m) == 0) { \
+            if(strncmp(#string, m, strlen(#string)) == 0) { \
                 return HttpMethod::name; \
             }
             HTTP_METHOD_MAP(XX)
@@ -71,7 +71,7 @@ namespace sylar {
             return it == m_cookies.end() ? def : it -> second;
         }
 
-        void HttpRequest::setHeaders(const std::string& key, const std::string& val) {
+        void HttpRequest::setHeader(const std::string& key, const std::string& val) {
             m_headers[key] = val;
         }
         void HttpRequest::setParams (const std::string& key, const std::string& val) {
@@ -122,7 +122,13 @@ namespace sylar {
             return true;
         }
 
-        std::ostream& HttpRequest::dump(std::ostream& os) {
+        std::string HttpRequest::toString() const {
+            std::stringstream ss;
+            dump(ss);
+            return ss.str();
+        }
+
+        std::ostream& HttpRequest::dump(std::ostream& os) const {
             //GET /uri HTTP/1.1
             //Host: www.sylar.top
             //
@@ -151,8 +157,10 @@ namespace sylar {
             
             os << "connection: " << (m_close ? "close" : "keep-alive") << "\r\n";
 
+            //os << " test ";
             for(auto& i : m_headers) {
                 if(strcasecmp(i.first.c_str(), "connection") == 0) {
+                    //os << " test ";
                     continue;
                 }
                 os << i.first << ":" << i.second << "\r\n";
@@ -191,7 +199,13 @@ namespace sylar {
             m_headers.erase(key);
         }
 
-        std::ostream& HttpResponse::dump(std::ostream& os) {
+        std::string HttpResponse::toString() const {
+            std::stringstream ss;
+            dump(ss);
+            return ss.str();
+        }
+
+        std::ostream& HttpResponse::dump(std::ostream& os) const {
             os << "HTTP/"
                << ((uint32_t)(m_version >> 4))
                << "."
