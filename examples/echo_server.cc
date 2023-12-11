@@ -29,7 +29,7 @@ void EchoServer::handleClient(sylar::Socket::ptr client) {
         int rt = client -> recv(&iovs[0], iovs.size());
         if(rt == 0) {
             SYLAR_LOG_INFO(g_logger) << "client close " << *client;
-            // SYLAR_LOG_INFO(g_logger) << "step0 ";
+            // SYgiLAR_LOG_INFO(g_logger) << "step0 ";
             break;
         } else if (rt < 0) {
             SYLAR_LOG_INFO(g_logger) << "client error rt = " << rt         
