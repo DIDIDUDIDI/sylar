@@ -19,6 +19,15 @@ namespace sylar {
         static uint64_t s_http_request_buffer_size = 0;
         static uint64_t s_http_request_max_body_size = 0;
 
+        uint64_t HttpRequestParser::GetHttpRequestBufferSize() {
+            return s_http_request_buffer_size;
+        }
+
+        uint64_t HttpRequestParser::GetHttpRequestMaxBodySize() {
+            return s_http_request_max_body_size;
+        }
+
+    namespace {
         struct _RequestSizeIniter {
             _RequestSizeIniter() {
                 s_http_request_buffer_size = g_http_request_buffer_size -> getValue();
@@ -34,7 +43,8 @@ namespace sylar {
         };
 
         static _RequestSizeIniter _init;
-
+    }
+    
         void on_request_method(void *data, const char *at, size_t length) {
             HttpRequestParser* parser = static_cast<HttpRequestParser*>(data);
             HttpMethod m = CharsToHttpMethod(at);
