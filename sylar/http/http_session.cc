@@ -3,6 +3,7 @@
 
 namespace sylar {
     namespace http {
+
         HttpSession::HttpSession(Socket::ptr sock, bool owner)
             : SocketStream(sock, owner) {
             
@@ -11,6 +12,7 @@ namespace sylar {
         HttpRequest::ptr HttpSession::recvRequest() {
             HttpRequestParser::ptr parser(new HttpRequestParser);
             uint64_t buffer_size = HttpRequestParser::GetHttpRequestBufferSize();
+
             std::shared_ptr<char> buffer(new char[buffer_size], [](char* ptr){
                 delete[] ptr;
             });
@@ -32,8 +34,7 @@ namespace sylar {
                     return nullptr;
                 }
                 if(parser -> isFinished()) {
-                    // TODO
-                } else {
+                    break;
                 }
             } while (true);
 
@@ -41,6 +42,7 @@ namespace sylar {
             if(length > 0) {
                 std::string body;
                 body.reserve(length);
+                
                 if(length >= offset) {
                     body.append(data, offset);
                 } else {

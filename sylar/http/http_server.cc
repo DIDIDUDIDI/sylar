@@ -12,7 +12,7 @@ namespace sylar {
 
         void HttpServer::handleClient(Socket::ptr client) {
             sylar::http::HttpSession::ptr session(new HttpSession(client));
-            SYLAR_LOG_DEBUG(g_logger) << "test1";
+            // SYLAR_LOG_DEBUG(g_logger) << "test1";
             do {
                 auto req = session -> recvRequest();
                 if(!req) {
