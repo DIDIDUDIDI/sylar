@@ -1,4 +1,5 @@
 /build/
 /bin/test*
+/bin/echo*
 lib/*.so
 lib/*.a
