@@ -5,7 +5,7 @@
 #include "scheduler.h"
 #include "log.h"
 
-#define optimizerTest 1
+#define optimizerTest 0
 
 namespace sylar{
 
@@ -140,7 +140,7 @@ namespace sylar{
 
     void Fiber::callIn() {
         SetThis(this);
-        SYLAR_ASSERT(m_state != EXEC);
+        //SYLAR_ASSERT(m_state != EXEC);
         m_state = EXEC;
         if(swapcontext(&t_threadFiber -> m_ctx, &m_ctx)) { // 从thread 协程切换到要执行的协程
             SYLAR_ASSERT2(false, "swapcontext");
