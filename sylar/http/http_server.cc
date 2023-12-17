@@ -8,6 +8,7 @@ namespace sylar {
         HttpServer::HttpServer(bool keepalive, sylar::IOManager* worker, sylar::IOManager* accept_worker)
             : TcpServer(worker, accept_worker),
               m_isKeeplive(keepalive) {
+            m_dispatch.reset(new ServletDispatch);
         }
 
         void HttpServer::handleClient(Socket::ptr client) {
@@ -22,11 +23,15 @@ namespace sylar {
                     break;
                 }
                 
-                HttpResponse::ptr rsp(new HttpResponse(req -> getVersion(), req -> isClose() || !m_isKeeplive));
-                rsp -> setBody("hello DIDI");
 
-                SYLAR_LOG_INFO(g_logger) << "request: " << std::endl << *req;
-                SYLAR_LOG_INFO(g_logger) << "response: " << std::endl << *rsp;
+                HttpResponse::ptr rsp(new HttpResponse(req -> getVersion(), req -> isClose() || !m_isKeeplive));
+
+                // 为什么不直接respond? 因为这样我们就可以做一些类似Java AOP的概念，在handle前和后做些东西，然后一起sendrespond
+                m_dispatch->handle(req, rsp, session);
+                
+                // rsp -> setBody("hello DIDI");
+                // SYLAR_LOG_INFO(g_logger) << "request: " << std::endl << *req;
+                // SYLAR_LOG_INFO(g_logger) << "response: " << std::endl << *rsp;
 
                 session -> sendResponse(rsp);
             } while(m_isKeeplive);

@@ -9,6 +9,20 @@ void run() {
     while(! server -> bind(addr)) {
         sleep(2);
     }
+    auto sd = server -> getServletDispatch();
+    sd -> addServlet("/didi/xx", [](sylar::http::HttpRequest::ptr req,
+                                 sylar::http::HttpResponse::ptr rsp, 
+                                 sylar::http::HttpSession::ptr session) {
+        rsp -> setBody(req -> toString());
+        return 0;
+    });
+
+    sd -> addGlobServlet("/didi/*", [](sylar::http::HttpRequest::ptr req,
+                                 sylar::http::HttpResponse::ptr rsp, 
+                                 sylar::http::HttpSession::ptr session) {
+        rsp -> setBody("Glob:\r\n" + req -> toString());
+        return 0;
+    });
     server -> start();
 }
 
